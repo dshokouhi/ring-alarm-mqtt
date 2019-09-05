@@ -90,6 +90,15 @@ function supportedDevice(device) {
             device.className = 'motion'
             device.component = 'binary_sensor'
             break;
+        case 'motion-sensor.beams':
+            device.className = 'motion'
+            device.component = 'binary_sensor'
+            break;
+        case 'switch.multilevel.beams':
+            device.classNames = [ 'light', 'motion' ]
+            device.suffixNames = [ 'Light', 'Motion' ]
+            device.component = 'binary_sensor'
+            break;
         case 'alarm.smoke':
             device.className = 'smoke' 
             device.component = 'binary_sensor'
@@ -239,6 +248,23 @@ function publishDeviceData(data, deviceTopic) {
         case 'sensor.contact':
         case 'sensor.motion':
             var deviceState = data.faulted ? 'ON' : 'OFF'
+            break;
+        case 'motion-sensor.beams':
+            var deviceState = data.faulted ? 'ON' : 'OFF'
+            break;
+        case 'switch.multilevel.beams':
+            const lightStatus = data.on ? 'ON' : 'OFF'
+            var motionStatus = undefined
+            switch (data.motionStatus) {
+              case 'clear':
+                  var motionStatus = 'OFF'
+                  break;
+              case 'faulted':
+                  var motionStatus = 'ON'
+                  break;
+            }
+            publishMqttState(deviceTopic+'/light/state', lightStatus)
+            publishMqttState(deviceTopic+'/motion/state', motionStatus)
             break;
         case 'alarm.smoke':
         case 'alarm.co':
